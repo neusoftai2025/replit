@@ -3,13 +3,21 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Meeting Room Reservation System API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: rooms
+    description: Meeting room operations
+  - name: reservations
+    description: Reservation operations
+  - name: dashboard
+    description: Dashboard operations
 paths:
   /healthz:
     get:
@@ -24,6 +32,312 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+
+  /rooms:
+    get:
+      operationId: listRooms
+      tags: [rooms]
+      summary: List all meeting rooms
+      parameters:
+        - name: floor
+          in: query
+          schema:
+            type: integer
+        - name: capacity
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of rooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Room"
+
+    post:
+      operationId: createRoom
+      tags: [rooms]
+      summary: Create a new room
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRoomBody"
+      responses:
+        "201":
+          description: Room created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+
+  /rooms/{id}:
+    get:
+      operationId: getRoom
+      tags: [rooms]
+      summary: Get room details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Room details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+        "404":
+          description: Room not found
+
+    patch:
+      operationId: updateRoom
+      tags: [rooms]
+      summary: Update a room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRoomBody"
+      responses:
+        "200":
+          description: Room updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+        "404":
+          description: Room not found
+
+    delete:
+      operationId: deleteRoom
+      tags: [rooms]
+      summary: Delete a room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Room deleted
+        "404":
+          description: Room not found
+
+  /reservations:
+    get:
+      operationId: listReservations
+      tags: [reservations]
+      summary: List reservations
+      parameters:
+        - name: roomId
+          in: query
+          schema:
+            type: integer
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: userId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of reservations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reservation"
+
+    post:
+      operationId: createReservation
+      tags: [reservations]
+      summary: Create a reservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReservationBody"
+      responses:
+        "201":
+          description: Reservation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reservation"
+        "409":
+          description: Time slot conflict
+
+  /reservations/{id}:
+    get:
+      operationId: getReservation
+      tags: [reservations]
+      summary: Get reservation details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Reservation details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reservation"
+        "404":
+          description: Reservation not found
+
+    patch:
+      operationId: updateReservation
+      tags: [reservations]
+      summary: Update a reservation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateReservationBody"
+      responses:
+        "200":
+          description: Reservation updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reservation"
+        "404":
+          description: Reservation not found
+
+    delete:
+      operationId: deleteReservation
+      tags: [reservations]
+      summary: Cancel a reservation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Reservation cancelled
+        "404":
+          description: Reservation not found
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Dashboard summary with stats
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/today:
+    get:
+      operationId: getTodayReservations
+      tags: [dashboard]
+      summary: Get today's reservations
+      responses:
+        "200":
+          description: Today's reservations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reservation"
+
+  /dashboard/room-usage:
+    get:
+      operationId: getRoomUsage
+      tags: [dashboard]
+      summary: Get room usage statistics
+      responses:
+        "200":
+          description: Room usage stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoomUsage"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +348,230 @@ components:
       required:
         - status
 
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        message:
+          type: string
+      required:
+        - user
+        - message
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [admin, user]
+        department:
+          type: string
+      required:
+        - id
+        - name
+        - email
+        - role
+        - department
+
+    Room:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        floor:
+          type: integer
+        capacity:
+          type: integer
+        equipment:
+          type: array
+          items:
+            type: string
+        available:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - floor
+        - capacity
+        - equipment
+        - available
+        - createdAt
+
+    CreateRoomBody:
+      type: object
+      properties:
+        name:
+          type: string
+        floor:
+          type: integer
+        capacity:
+          type: integer
+        equipment:
+          type: array
+          items:
+            type: string
+        available:
+          type: boolean
+      required:
+        - name
+        - floor
+        - capacity
+
+    UpdateRoomBody:
+      type: object
+      properties:
+        name:
+          type: string
+        floor:
+          type: integer
+        capacity:
+          type: integer
+        equipment:
+          type: array
+          items:
+            type: string
+        available:
+          type: boolean
+
+    Reservation:
+      type: object
+      properties:
+        id:
+          type: integer
+        roomId:
+          type: integer
+        userId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        date:
+          type: string
+          format: date
+        startTime:
+          type: string
+        endTime:
+          type: string
+        attendees:
+          type: integer
+        roomName:
+          type: string
+        userName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - roomId
+        - userId
+        - title
+        - date
+        - startTime
+        - endTime
+        - attendees
+        - roomName
+        - userName
+        - createdAt
+
+    CreateReservationBody:
+      type: object
+      properties:
+        roomId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+          format: date
+        startTime:
+          type: string
+        endTime:
+          type: string
+        attendees:
+          type: integer
+      required:
+        - roomId
+        - title
+        - date
+        - startTime
+        - endTime
+        - attendees
+
+    UpdateReservationBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+          format: date
+        startTime:
+          type: string
+        endTime:
+          type: string
+        attendees:
+          type: integer
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalRooms:
+          type: integer
+        totalReservationsToday:
+          type: integer
+        availableRoomsNow:
+          type: integer
+        upcomingReservations:
+          type: integer
+      required:
+        - totalRooms
+        - totalReservationsToday
+        - availableRoomsNow
+        - upcomingReservations
+
+    RoomUsage:
+      type: object
+      properties:
+        roomId:
+          type: integer
+        roomName:
+          type: string
+        reservationCount:
+          type: integer
+        utilizationPercent:
+          type: number
+      required:
+        - roomId
+        - roomName
+        - reservationCount
+        - utilizationPercent
