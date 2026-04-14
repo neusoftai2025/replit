@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Home, LayoutDashboard, LogOut, Settings, User as UserIcon } from "lucide-react";
+import { Calendar, CalendarDays, Home, LayoutDashboard, LogOut, Settings } from "lucide-react";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
@@ -59,6 +59,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={location === "/calendar"}>
+                      <Link href="/calendar">
+                        <Calendar className="h-4 w-4" />
+                        <span>カレンダー予約</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={location.startsWith("/reservations")}>
                       <Link href="/reservations">

@@ -14,6 +14,7 @@ import RoomDetail from "@/pages/rooms/room-detail";
 import ReservationsList from "@/pages/reservations/index";
 import NewReservation from "@/pages/reservations/new";
 import AdminRooms from "@/pages/admin/rooms";
+import CalendarView from "@/pages/calendar";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,10 @@ function Router() {
 
       <Route path="/reservations/new">
         {() => <ProtectedRoute component={NewReservation} />}
+      </Route>
+
+      <Route path="/calendar">
+        {() => <ProtectedRoute component={CalendarView} />}
       </Route>
 
       <Route path="/admin/rooms">
