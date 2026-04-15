@@ -668,31 +668,6 @@ export default function CalendarView() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Delete Confirm ────────────────────────────────────────────────── */}
-      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>予約を削除しますか？</AlertDialogTitle>
-            <AlertDialogDescription>
-              「{selectedRes?.title}」の予約を削除します。この操作は取り消せません。
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>キャンセル</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => {
-                if (selectedRes) deleteMutation.mutate({ id: selectedRes.id });
-              }}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              削除する
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       {/* ── New Reservation Dialog ────────────────────────────────────────── */}
       <Dialog
         open={newDialogOpen}
