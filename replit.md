@@ -2,43 +2,65 @@
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. This is a Meeting Room Reservation System (会議室予約システム).
+pnpm workspace monorepo. This is a Meeting Room Reservation System (会議室予約システム).
+Frontend: React + Vite (TypeScript). Backend: Spring Boot 3 (Java).
 
 ## Stack
 
-- **Monorepo tool**: pnpm workspaces
-- **Node.js version**: 24
-- **Package manager**: pnpm
-- **TypeScript version**: 5.9
-- **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
-- **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
-- **Frontend**: React + Vite + Tailwind CSS + shadcn/ui
-- **Auth**: Cookie-based session (`cookie-session`)
-- **Language**: Japanese UI
+### Frontend
+- **Framework**: React + Vite
+- **Styling**: Tailwind CSS + shadcn/ui
+- **State**: TanStack Query (React Query)
+- **Routing**: Wouter
+- **Language**: TypeScript
+
+### Backend
+- **Framework**: Spring Boot 3.2.5 (Java 19)
+- **Server**: Apache Tomcat (embedded)
+- **Database**: PostgreSQL + Spring Data JPA + Hibernate 6
+- **Connection pool**: HikariCP
+- **Auth**: HttpSession (cookie-based, JSESSIONID)
+- **Security**: Spring Security (CSRF disabled, permissive)
+- **Password**: BCrypt (with plain text fallback for seed data)
 
 ## Project Structure
 
 ### Frontend (`artifacts/meeting-rooms`)
-- `/login` — Login page (matches provided screenshot with blue CTA)
+- `/login` — Login page
 - `/` — Dashboard with stats and today's reservations
 - `/rooms` — Searchable meeting room list
 - `/rooms/:id` — Room detail with reservation history
 - `/reservations` — My reservations / all reservations (admin)
 - `/reservations/new` — New reservation form
+- `/calendar` — Calendar view with drag-to-select
 - `/admin/rooms` — Admin room management (admin only)
 
-### Backend (`artifacts/api-server`)
-- `/api/auth/login` — Login with email/password
-- `/api/auth/me` — Get current user
-- `/api/auth/logout` — Logout
-- `/api/rooms` — CRUD for meeting rooms
-- `/api/reservations` — CRUD for reservations (conflict detection)
-- `/api/dashboard/summary` — Stats summary
-- `/api/dashboard/today` — Today's reservations
-- `/api/dashboard/room-usage` — Room usage statistics
+### Backend (`artifacts/spring-api`)
+Spring Boot 3 project. Serves at port 8080 via artifact path `/api`.
+
+- `POST /api/auth/login` — Login with email/password
+- `GET /api/auth/me` — Get current user from session
+- `POST /api/auth/logout` — Logout (invalidate session)
+- `GET/POST /api/rooms` — List / create rooms
+- `GET/PATCH/DELETE /api/rooms/:id` — Room CRUD
+- `GET/POST /api/reservations` — List / create reservations (conflict detection)
+- `GET/PATCH/DELETE /api/reservations/:id` — Reservation CRUD
+- `GET /api/dashboard/summary` — Stats summary
+- `GET /api/dashboard/today` — Today's reservations
+- `GET /api/dashboard/room-usage` — Room usage statistics
+
+Key packages:
+- `com.meetingrooms.config` — Security, DataSource, CORS
+- `com.meetingrooms.entity` — User, Room, Reservation (JPA entities)
+- `com.meetingrooms.repository` — Spring Data JPA repositories
+- `com.meetingrooms.service` — Business logic
+- `com.meetingrooms.controller` — REST controllers
+- `com.meetingrooms.dto` — Response DTOs
+
+### Legacy (kept for reference)
+- `artifacts/api-server/` — Original Node.js/Express backend (no longer running)
+- `lib/db/` — Drizzle ORM schema (no longer used by backend)
+- `lib/api-zod/`, `lib/api-client-react/`, `lib/api-spec/` — OpenAPI codegen artifacts
 
 ## Test Accounts
 
@@ -51,10 +73,6 @@ pnpm workspace monorepo using TypeScript. This is a Meeting Room Reservation Sys
 
 ## Key Commands
 
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- `pnpm --filter @workspace/api-server run dev` — run API server locally
-
-See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+- Spring Boot (dev): `mvn -f artifacts/spring-api/pom.xml spring-boot:run`
+- Spring Boot (build): `mvn -f artifacts/spring-api/pom.xml package -DskipTests`
+- Frontend (dev): `pnpm --filter @workspace/meeting-rooms run dev`
